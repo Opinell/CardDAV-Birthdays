@@ -1,0 +1,11 @@
+{
+  "domain": "carddav_birthdays",
+  "name": "CardDAV Birthdays",
+  "version": "1.0.0",
+  "documentation": "https://github.com/Opinell/carddav-birthdays",
+  "issue_tracker": "https://github.com/Opinell/carddav-birthdays/issues",
+  "requirements": ["vobject==0.9.6.1"],
+  "config_flow": true,
+  "iot_class": "cloud_polling",
+  "codeowners": ["@Opinell"]
+}

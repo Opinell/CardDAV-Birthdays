@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "CardDAV Birthdays",
+        "description": "Connect to a CardDAV address book to track contact birthdays.",
+        "data": {
+          "server_url": "CardDAV server URL (address book URL)",
+          "username": "Username",
+          "password": "Password",
+          "upcoming_days": "Upcoming birthdays window (days)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid username or password.",
+      "cannot_connect": "Could not connect to the CardDAV server. Check the URL and try again.",
+      "invalid_url": "The server URL is not valid."
+    },
+    "abort": {
+      "already_configured": "This CardDAV account is already configured."
+    }
+  }
+}
