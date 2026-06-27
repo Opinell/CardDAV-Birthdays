@@ -6,7 +6,7 @@ from typing import Any
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -34,7 +34,7 @@ def _device_info(entry: ConfigEntry) -> DeviceInfo:
         name="CardDAV Birthdays",
         manufacturer="CardDAV",
         model="Birthday Tracker",
-        entry_type="service",
+        entry_type=DeviceEntryType.SERVICE,
     )
 
 

@@ -8,7 +8,8 @@ import aiohttp
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.config_entries import ConfigFlowResult
+from homeassistant.core import HomeAssistant
 
 from .const import (
     CONF_PASSWORD,
@@ -33,20 +34,21 @@ STEP_USER_SCHEMA = vol.Schema(
 )
 
 
-async def _validate_connection(server_url: str, username: str, password: str) -> str | None:
+async def _validate_connection(hass: HomeAssistant, server_url: str, username: str, password: str) -> str | None:
     """Try a PROPFIND against the server URL. Returns error key or None on success."""
+    from homeassistant.helpers.aiohttp_client import async_get_clientsession
     auth = aiohttp.BasicAuth(username, password)
     headers = {"Depth": "0", "Content-Type": "application/xml"}
     timeout = aiohttp.ClientTimeout(total=15)
+    session = async_get_clientsession(hass)
     try:
-        async with aiohttp.ClientSession(auth=auth, timeout=timeout) as session:
-            async with session.request(
-                "PROPFIND", server_url, headers=headers
-            ) as resp:
-                if resp.status in (401, 403):
-                    return "invalid_auth"
-                if resp.status >= 400:
-                    return "cannot_connect"
+        async with session.request(
+            "PROPFIND", server_url, headers=headers, auth=auth, timeout=timeout
+        ) as resp:
+            if resp.status in (401, 403):
+                return "invalid_auth"
+            if resp.status >= 400:
+                return "cannot_connect"
     except aiohttp.InvalidURL:
         return "invalid_url"
     except aiohttp.ClientError:
@@ -61,13 +63,13 @@ class CardDAVBirthdaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
 
         if user_input is not None:
             server_url = user_input[CONF_SERVER_URL].rstrip("/")
             error = await _validate_connection(
-                server_url, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
+                self.hass, server_url, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
             )
             if error:
                 errors["base"] = error

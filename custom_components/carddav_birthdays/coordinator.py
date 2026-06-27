@@ -10,6 +10,7 @@ import aiohttp
 import vobject
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
@@ -143,19 +144,21 @@ class CardDAVBirthdayCoordinator(DataUpdateCoordinator):
             "Depth": "1",
         }
         timeout = aiohttp.ClientTimeout(total=30)
+        session = async_get_clientsession(self.hass)
         try:
-            async with aiohttp.ClientSession(auth=auth, timeout=timeout) as session:
-                async with session.request(
-                    "REPORT",
-                    self._server_url,
-                    data=ADDRESSBOOK_QUERY,
-                    headers=headers,
-                ) as resp:
-                    if resp.status not in (207, 200):
-                        raise UpdateFailed(
-                            f"CardDAV REPORT returned HTTP {resp.status}"
-                        )
-                    body = await resp.text()
+            async with session.request(
+                "REPORT",
+                self._server_url,
+                data=ADDRESSBOOK_QUERY,
+                headers=headers,
+                auth=auth,
+                timeout=timeout,
+            ) as resp:
+                if resp.status not in (207, 200):
+                    raise UpdateFailed(
+                        f"CardDAV REPORT returned HTTP {resp.status}"
+                    )
+                body = await resp.text()
         except aiohttp.ClientError as exc:
             raise UpdateFailed(f"Cannot connect to CardDAV server: {exc}") from exc
 
